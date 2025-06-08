@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 
-function verifyToken(req, res, next) {
-  const token = req.cookies.token;
+function auth(req, res, next) {
+  const token = req.headers.authorization; //req.cookies.token - testando primeiro;
 
   if (!token) {
     return res
@@ -18,4 +18,4 @@ function verifyToken(req, res, next) {
   }
 }
 
-module.exports = verifyToken;
+module.exports = auth;
