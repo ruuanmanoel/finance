@@ -41,4 +41,31 @@ router.post("/categorias", async (req, res) => {
   }
 });
 
+router.delete("/categorias", async (req, res) => {
+  const { id } = req.user;
+  const categoryId = req.body.id;
+  try {
+    const deletedCategory = await prisma.category.deleteMany({
+      where: {
+        AND: [
+          {
+            userId: id,
+          },
+          {
+            id: categoryId,
+          },
+        ],
+      },
+    });
+    if (deletedCategory == 0) {
+      return res.status(404).json({ message: "Categoria não encontrada." });
+    }
+    return res.status(200).json("Categoria deletada com sucesso.");
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ error: "Não foi possivel deletar a categoria." });
+  }
+});
+
 module.exports = router;
