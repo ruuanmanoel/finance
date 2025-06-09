@@ -8,14 +8,7 @@ router.get("/categorias", async (req, res) => {
   const { id } = req.user;
   try {
     const categories = await prisma.category.findMany({
-      where: {
-        OR: [
-          {
-            userId: null,
-          },
-          { userId: id },
-        ],
-      },
+      where: { userId: id },
     });
     return res.status(200).json(categories);
   } catch (error) {
