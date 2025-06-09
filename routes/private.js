@@ -23,4 +23,22 @@ router.get("/categorias", async (req, res) => {
   }
 });
 
+router.post("/categorias", async (req, res) => {
+  const { id } = req.user;
+  const { name, type } = req.body;
+  try {
+    const categoryData = {
+      userId: id,
+      name,
+      type,
+    };
+    const categoryUser = await prisma.category.create({ data: categoryData });
+    return res.status(201).json(categoryUser);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ error: "Não foi possivel cadastrar a categoria" });
+  }
+});
+
 module.exports = router;
