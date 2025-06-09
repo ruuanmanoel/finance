@@ -1,6 +1,7 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { copyDefaultCategoriesForUser } = require("../services/userService");
 
 const { PrismaClient } = require("@prisma/client");
 
@@ -24,6 +25,13 @@ router.post("/cadastro", async (req, res) => {
 
     const newUser = await prisma.user.create({ data: userData });
     const { password: _, ...userWithoutPassword } = newUser;
+    try {
+      await copyDefaultCategoriesForUser(newUser.id);
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ message: "Não foi possivel instalar as categorias padrão." });
+    }
     res.status(201).json(userWithoutPassword);
   } catch (error) {
     res.status(500).json({ error: "Erro ao cadastrar usuário" });
