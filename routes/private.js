@@ -1,5 +1,6 @@
 const express = require("express");
 const { PrismaClient } = require("@prisma/client");
+const { getNameCategory } = require("../services/categoryService");
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -58,6 +59,39 @@ router.delete("/categorias", async (req, res) => {
     return res
       .status(500)
       .json({ error: "Não foi possivel deletar a categoria." });
+  }
+});
+
+router.post("/transacao", async (req, res) => {
+  const { id } = req.user;
+  const {
+    bankAccountId,
+    categoryId,
+    type,
+    amount,
+    description,
+    paymentMethod,
+    transactionDate,
+  } = req.body;
+  try {
+    const categoryName = await getNameCategory(categoryId, id);
+    transactionData = {
+      userId: id,
+      bankAccountId: bankAccountId || null,
+      categoryId: categoryId,
+      type: type,
+      amount: amount,
+      description: description || null,
+      paymentMethod: paymentMethod || null,
+      transactionDate: new Date(transactionDate),
+      categoryName: categoryName,
+    };
+    newtransction = await prisma.transaction.create({ data: transactionData });
+    return res.status(201).json(newtransction);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Não foi possivel cadastrar transação." });
   }
 });
 
