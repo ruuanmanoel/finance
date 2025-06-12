@@ -35,7 +35,8 @@ model BankAccount {
   name           String
   agency         String?
   account        String?
-  initialBalance Decimal  @default(0.0)
+  initialBalance Decimal  @default(10.2)
+  currentBalance Decimal  @default(10.2)
   createdAt      DateTime @default(now())
 
   transactions Transaction[]
