@@ -86,12 +86,51 @@ router.post("/transacao", async (req, res) => {
       transactionDate: new Date(transactionDate),
       categoryName: categoryName,
     };
-    newtransction = await prisma.transaction.create({ data: transactionData });
+
+    newtransction = await prisma.$transaction(async (tx) => {
+      const transaction = tx.transaction.create({ data: transactionData });
+      if (bankAccountId) {
+        const adjustment = type === "income" ? amount : -amount;
+        await tx.bankAccount.update({
+          where: { id: bankAccountId },
+          data: {
+            currentBalance: {
+              increment: adjustment,
+            },
+          },
+        });
+      }
+      return transaction;
+    });
     return res.status(201).json(newtransction);
   } catch (error) {
+    console.log(error);
     return res
       .status(500)
       .json({ message: "Não foi possivel cadastrar transação." });
+  }
+});
+
+router.post("/contas", async (req, res) => {
+  const { id } = req.user;
+  const { name, agency, account, initialBalance } = req.body;
+
+  try {
+    const accountData = {
+      userId: id,
+      name,
+      agency: agency || null,
+      account: account || null,
+      initialBalance,
+      currentBalance: initialBalance,
+    };
+    const newAccount = await prisma.bankAccount.create({ data: accountData });
+    return res.status(201).json(newAccount);
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(500)
+      .json({ message: "Não foi posivel cadastrar uma conta" });
   }
 });
 
